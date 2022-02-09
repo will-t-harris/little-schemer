@@ -1,4 +1,4 @@
-#lang racket
+#lang scheme
 
 (define (atom? x) (not (or (pair? x) (null? x))))
 
@@ -98,4 +98,50 @@
   (lambda (n lat)
     (cond
       ((zero? (sub1 n)) (cdr lat))
+      (else (cons (car lat) (rempick (sub1 n) (cdr lat)))))))
+
+; Remove all numbers from list of atoms
+(define no-nums
+  (lambda (lat)
+    (cond
+      ((null? lat) '())
+      ((number? (car lat)) (no-nums (cdr lat)))
+      (else (cons (car lat) (no-nums (cdr lat)))))))
+
+; Remove all non-numbers from list of atoms
+(define all-nums
+  (lambda (lat)
+    (cond
+      ((null? lat) '())
+      ((not (number? (car lat))) (all-nums (cdr lat)))
+      (else (cons (car lat) (all-nums (cdr lat)))))))
+
+; Returns true if arguments are the same atom
+(define equan?
+  (lambda (a1 a2)
+    (cond
+      ((and (number? a1) (number? a2)) (= a1 a2))
+      ((or (number? a1) (number? a2)) #f)
+      (else (eq? a1 a2)))))
+
+; Returns the number of times atom `a` occurs in a list of atoms
+(define occur
+  (lambda (a lat)
+    (cond
+      ((null? lat) 0)
+      (else
+       (cond
+         ((equan? (car lat) a) (add1 (occur a (cdr lat))))
+         (else (occur a (cdr lat))))))))
+
+; Predicate to check whether a number equals one
+(define one?
+  (lambda (n)
+    (= n 1)))
+
+; Remove and return an atom out of a given list of atoms (using the one? predicate)
+(define rempick-with-one
+  (lambda (n lat)
+    (cond
+      ((one? n) (cdr lat))
       (else (cons (car lat) (rempick (sub1 n) (cdr lat)))))))
