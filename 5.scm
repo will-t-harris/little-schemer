@@ -124,3 +124,57 @@
 ; leftmost tests
 (leftmost '((potato) (chips ((with) fish) (chips)))) "should equal" 'potato (newline)
 (leftmost '(((hot) (tuna (and))) cheese)) "should equal" 'hot (newline)
+
+
+; Determines if two lists are equal
+(define eqlist?
+  (lambda (l1 l2)
+    (cond
+      ((and (null? l1) (null? l2)) #t)
+      ((or (null? l1) (null? l2)) #f)
+      ((and (atom? (car l1)) (atom? (car l2)))
+       (and (eq? (car l1) (car l2)) (eqlist? (cdr l1) (cdr l2))))
+      (else
+       (and (eqlist? (car l1) (car l2))
+            (eqlist? (cdr l1) (cdr l2)))))))
+      
+; eqlist? tests
+(eqlist? '(strawberry ice cream) '(strawberry cream ice)) "should equal" #f (newline)
+(eqlist? '(beef ((sausage)) (and (soda))) '(beef ((sausage)) (and (soda)))) "should equal" #t (newline)
+(eqlist? '() '()) "should equal" #t (newline)
+
+
+; Determines equality between S-expressions
+(define equal?
+  (lambda (s1 s2)
+    (cond
+      ((and (atom? s1) (atom? s2)) (eq? s1 s2))
+      ((or (atom? s1) (atom? s2) #f))
+      (else (eqlist? s1 s2)))))
+
+
+; eqlist? rewritten using equal? (eqlist2?)
+(define eqlist2?
+  (lambda (l1 l2)
+    (cond
+      ((and (null? l1) (null? l2)) #t)
+      ((or (null? l1) (null? l2)) #f)
+      (else (and (equal? (car l1) (car l2))
+                 (eqlist? (cdr l1) (cdr l2)))))))
+
+; tests
+(eqlist2? '(strawberry ice cream) '(strawberry cream ice)) "should equal" #f (newline)
+(eqlist2? '(beef ((sausage)) (and (soda))) '(beef ((sausage)) (and (soda)))) "should equal" #t (newline)
+(eqlist2? '() '()) "should equal" #t (newline)
+
+
+; re-worked rember; removes a S-expression from a list of S-expressions
+(define rember
+  (lambda (s l)
+    (cond
+      ((null? l) '())
+      ((equal? (car l) s) (cdr l))
+      (else (cons (car l) (rember s (cdr l)))))))
+
+; rember tests
+(rember 'boop '(goop toop boop shoop)) "should equal" '(goop toop shoop) (newline)
