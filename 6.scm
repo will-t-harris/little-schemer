@@ -31,3 +31,32 @@
 ; value tests
 (value '(1 + (2 x 3))) "should equal" 7 (newline)
 (value '(4 + (2 ^ 4))) "should equal" 20 (newline)
+
+
+; Returns the value for prefix notation expressions (+ 1 2)
+(define first-sub-exp
+  (lambda (aexp)
+    (car (cdr aexp))))
+
+(define second-sub-exp
+  (lambda (aexp)
+    (car (cdr (cdr aexp)))))
+
+(define operator
+  (lambda (aexp)
+    (car aexp)))
+
+(define value2
+  (lambda (nexp)
+    (cond
+      ((atom? nexp) nexp)
+      ((eq? (operator nexp) '+)
+       (+ (value2 (first-sub-exp nexp)) (value2 (second-sub-exp nexp))))
+      ((eq? (operator nexp) '*)
+       (* (value2 (first-sub-exp nexp)) (value2 (second-sub-exp nexp))))
+      (else
+       (expt (value2 (first-sub-exp nexp)) (value2 (second-sub-exp nexp)))))))
+
+(value2 '(+ 1 2)) "should equal" 3 (newline)
+(value2 '(* 4 4)) "should equal" 16 (newline)
+(value2 '(^ 2 3)) "should equal" 8 (newline)
